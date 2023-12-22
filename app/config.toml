@@ -1,0 +1,27 @@
+[app]
+name = "signer-core"
+
+[log]
+    # log level:
+    #   0: Panic
+    #   1: Fatal
+    #   2: Error
+    #   3: Warn
+    #   4: Info
+    #   5: Debug
+    #   6: Trace
+    [log.stdout]
+    enable = true 
+    level = 6 
+
+    [log.file]
+    enable = true
+    level = 6 
+    path = "signer-core.log"
+
+[storage]
+file-path = "key.db"
+
+[server]
+http-server-address = "0.0.0.0:9091"
+https-server-address = "0.0.0.0:9090"

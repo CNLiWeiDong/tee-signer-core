@@ -1,0 +1,44 @@
+FROM ubuntu:20.04 as ego
+
+WORKDIR /sgx
+
+RUN apt-get update && apt-get -y upgrade
+RUN apt-get install -y wget build-essential libssl-dev
+RUN ln -fs /usr/share/zoneinfo/UTC /etc/localtime
+RUN apt-get install -y software-properties-common
+
+RUN mkdir -p /etc/apt/keyrings
+RUN wget -qO- https://download.01.org/intel-sgx/sgx_repo/ubuntu/intel-sgx-deb.key |  tee /etc/apt/keyrings/intel-sgx-keyring.asc > /dev/null
+RUN echo "deb [signed-by=/etc/apt/keyrings/intel-sgx-keyring.asc arch=amd64] https://download.01.org/intel-sgx/sgx_repo/ubuntu $(lsb_release -cs) main" |  tee /etc/apt/sources.list.d/intel-sgx.list
+RUN apt-get update
+RUN wget https://github.com/edgelesssys/ego/releases/download/v1.4.1/ego_1.4.1_amd64_ubuntu-20.04.deb
+RUN apt-get install -y ./ego_1.4.1_amd64_ubuntu-20.04.deb 
+RUN rm ego_1.4.1_amd64_ubuntu-20.04.deb 
+
+FROM ego as build
+WORKDIR /sgx
+COPY . .
+WORKDIR /sgx/mpc-custody
+# # RUN export GOPRIVATE=gitlab.newhuoapps.com
+# RUN sed -i '$d' go.mod
+# RUN sed -i '$d' go.mod
+# RUN sed -i '$d' go.mod
+# RUN sed -i '$d' go.mod
+# RUN sed -i '$d' go.mod
+# RUN echo '\nreplace github.com/taurusgroup/multi-party-sig => ../mpc-core' >> go.mod
+# RUN echo '\nreplace gitlab.newhuoapps.com/dcenter/mpc-sdk => ../mpc-sdk' >> go.mod
+# RUN echo '\nreplace gitlab.newhuoapps.com/dcenter/mpc-service => ../mpc-service' >> go.mod
+# RUN apt-get install -y golang 
+# RUN go mod tidy
+RUN ego-go build -ldflags "-X gitlab.newhuoapps.com/dcenter/mpc-custody/common.Tag=sgx_mpc_node -X gitlab.newhuoapps.com/dcenter/mpc-custody/common.Commit=sgx_mpc_node -X gitlab.newhuoapps.com/dcenter/mpc-custody/common.BuildTime=sgx_mpc_node" -o build/sgx_mpc_node app/main.go
+RUN echo $(md5sum build/sgx_mpc_node) > build/sgx_mpc_node.md5
+
+FROM scratch as export
+WORKDIR /sgx
+COPY --from=build /sgx/mpc-custody/build/sgx_mpc_node /
+COPY --from=build /sgx/mpc-custody/build/sgx_mpc_node.md5 /
+
+FROM ego as node
+WORKDIR /sgx
+COPY build/sgx_mpc_node file-which-may-exis[t] .
+CMD ["ego", "run", "sgx_mpc_node", "--config=/tmp/mpc-node/config.toml", "--mode=mpc-node"]
