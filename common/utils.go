@@ -4,7 +4,7 @@ import (
 	"runtime"
 	"time"
 
-	"blockchain.com/pump/log"
+	"tianxian.com/tee-signer-core/log"
 )
 
 // TimeConsume provides convenience function for time-consuming calculation

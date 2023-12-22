@@ -7,7 +7,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"blockchain.com/pump/log"
+	"tianxian.com/tee-signer-core/log"
 )
 
 const (

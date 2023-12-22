@@ -6,7 +6,7 @@ import (
 	"sync"
 	"syscall"
 
-	"blockchain.com/pump/log"
+	"tianxian.com/tee-signer-core/log"
 )
 
 func DoLoopJobs(jobs ...func(chan struct{})) {

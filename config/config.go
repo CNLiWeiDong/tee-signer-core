@@ -1,11 +1,11 @@
-package pump
+package config
 
 import (
 	"os"
 
 	"github.com/BurntSushi/toml"
 
-	"blockchain.com/pump/log"
+	"tianxian.com/tee-signer-core/log"
 )
 
 func LoadConfig(configPath string) {
@@ -48,11 +48,6 @@ func LoadConfig(configPath string) {
 			log.Entry.Fatal(err)
 		}
 	}
-
-	for idx := range Conf.Bean {
-		Conf.Bean[idx].EmptyInterval = max(Conf.Bean[idx].EmptyInterval, Conf.EmptyInterval)
-		Conf.Bean[idx].ErrInterval = max(Conf.Bean[idx].ErrInterval, Conf.ErrInterval)
-	}
 }
 
 var Conf *Config
@@ -62,27 +57,11 @@ type Config struct {
 	EmptyInterval int64 `toml:"empty_interval_ms"`
 	// pump 处理上述报错后的休眠时间. 不同类型任务之间无影响. 最小值 5_000
 	ErrInterval int64 `toml:"err_interval_ms"`
-	Kafka       struct {
-		Enable bool `toml:"enable"`
-
-		Topic   string   `toml:"topic"`
-		Brokers []string `toml:"brokers"`
-	} `toml:"kafka"`
-	Business map[string]string `toml:"business"`
 	Log      struct {
 		Stdout stdout   `toml:"stdout"`
 		File   file     `toml:"file"`
 		Kafka  kafkalog `toml:"kafka"`
 	} `toml:"log"`
-	Bean []Bean `toml:"bean"`
-}
-
-type Bean struct {
-	Chain     string `toml:"chain"`
-	DBConnStr string `toml:"db_conn_str"`
-	// bean 的 interval 配置可以覆盖通用配置(只能增大)
-	EmptyInterval int64 `toml:"empty_interval_ms"`
-	ErrInterval   int64 `toml:"err_interval_ms"`
 }
 
 type stdout struct {

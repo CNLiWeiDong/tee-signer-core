@@ -4,9 +4,10 @@ import (
 	"flag"
 	"fmt"
 
-	"blockchain.com/pump"
-	"blockchain.com/pump/common"
-	"blockchain.com/pump/log"
+	"tianxian.com/tee-signer-core/common"
+	"tianxian.com/tee-signer-core/config"
+	"tianxian.com/tee-signer-core/jobs"
+	"tianxian.com/tee-signer-core/log"
 )
 
 func main() {
@@ -22,15 +23,15 @@ func main() {
 
 	if len(*configFile) > 0 {
 		log.Entry.Infof("config file: %s", *configFile)
-		pump.LoadConfig(*configFile)
+		config.LoadConfig(*configFile)
 	} else {
 		// config file path
 		configPath := fmt.Sprintf("./config-%s.toml", *env)
 		log.Entry.Infof("config file: %s", configPath)
-		pump.LoadConfig(configPath)
+		config.LoadConfig(configPath)
 	}
 
-	jobs := []func(chan struct{}){common.Flush}
-	jobs = append(jobs, pump.GetJobs()...)
-	common.DoLoopJobs(jobs...)
+	tasks := []func(chan struct{}){common.Flush}
+	tasks = append(tasks, jobs.GetJobs()...)
+	common.DoLoopJobs(tasks...)
 }

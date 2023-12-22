@@ -1,4 +1,4 @@
-package jsondb
+package storage
 
 import (
 	"encoding/hex"

@@ -23,5 +23,5 @@ name = "signer-core"
 file-path = "key.db"
 
 [server]
-http-server-address = "0.0.0.0:9091"
-https-server-address = "0.0.0.0:9090"
+init-server = "0.0.0.0:9091"
+service-server = "0.0.0.0:9090"
